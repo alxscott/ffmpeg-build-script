@@ -367,6 +367,24 @@ if build "openssl"; then
 	build_done "openssl"
 fi
 
+if build "nvenc"; then
+	download "https://github.com/FFmpeg/nv-codec-headers/releases/download/n9.1.23.1/nv-codec-headers-9.1.23.1.tar.gz" "nv-codec-headers.tar.gz"
+	cd $PACKAGES/nv-codec-headers-9.1.23.1 || exit
+        execute make -j $MJOBS
+        execute make install PREFIX=${WORKSPACE}
+	build_done "nvenc"
+fi
+
+if build "zimg"; then
+	download "https://github.com/sekrit-twc/zimg/archive/release-2.9.3.tar.gz" "zimg-release-2.9.3.tar.gz"
+	cd $PACKAGES/zimg-release-2.9.3 || exit
+	execute ./autogen.sh
+	execute ./configure --prefix=${WORKSPACE} --enable-static --disable-shared
+        execute make -j $MJOBS
+        execute make install
+        build_done "zimg"
+fi
+
 build "ffmpeg"
 download "https://git.ffmpeg.org/gitweb/ffmpeg.git/snapshot/d1e8be34114d5782a5a4ea79ef0b9e92b6b37bc7.tar.gz" "ffmpeg-snapshot.tar.bz2"
 cd $PACKAGES/ffmpeg-d1e8be3/ || exit
@@ -389,11 +407,12 @@ cd $PACKAGES/ffmpeg-d1e8be3/ || exit
 	--enable-pthreads \
 	--enable-libvpx \
 	--enable-libmp3lame \
-    --enable-libopus \
+	--enable-libopus \
 	--enable-libtheora \
 	--enable-libvorbis \
 	--enable-libx264 \
 	--enable-libx265 \
+	--enable-libzimg \
 	--enable-runtime-cpudetect \
 	--enable-libfdk-aac \
 	--enable-avfilter \
@@ -401,7 +420,9 @@ cd $PACKAGES/ffmpeg-d1e8be3/ || exit
 	--enable-libopencore_amrnb \
 	--enable-filters \
 	--enable-libvidstab \
-	--enable-libaom
+	--enable-libaom \
+	--enable-opencl \
+	--enable-nvenc
 
 execute make -j $MJOBS
 execute make install
